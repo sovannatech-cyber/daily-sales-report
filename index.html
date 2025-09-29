@@ -112,11 +112,11 @@
       </div>
     </div>
 
-    <!-- Buttons -->
+    <!-- Action Buttons -->
     <div class="mt-4 space-y-2 hidden-print">
       <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded dark:bg-sky-700 dark:hover:bg-sky-600">Share to Telegram</button>
       <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
-      <button onclick="window.print()" class="w-full bg-gray-700 text-white py-2 rounded dark:bg-gray-800 dark:hover:bg-gray-600">Print</button>
+      <button id="btnPrint" class="w-full bg-gray-700 text-white py-2 rounded dark:bg-gray-800 dark:hover:bg-gray-600">Print</button>
       <button id="btnInstall" class="w-full bg-indigo-600 text-white py-2 rounded hidden dark:bg-indigo-700 dark:hover:bg-indigo-600">Install App</button>
       <button id="btnClearReport" class="w-full bg-red-500 text-white py-2 rounded dark:bg-red-600 dark:hover:bg-red-500">Clear Report</button>
     </div>
@@ -149,11 +149,252 @@
         </label>
       </div>
     </div>
+
+    <!-- Diagnostics -->
+    <div class="screen-only mt-4 p-3 border rounded dark:border-gray-700 dark:bg-gray-800">
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-semibold">Diagnostics</div>
+        <button id="btnRunDiagnostics" class="px-3 py-1 text-white bg-slate-700 rounded">Run</button>
+      </div>
+      <ul id="diagList" class="mt-2 text-sm list-disc pl-5"></ul>
+    </div>
+
   </div>
 
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    // All JavaScript from previous step (addSale, addPurchase, addExpense, calculateTotals, save/restore, dark mode toggle, telegram share) goes here
-    // For brevity not repeating again in this snippet
+    // Helpers
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    const customerList = ["General Customer","The Waters BK","The Woods LK","La Fashion BK","La Fashion LK","La Fashion BK/porridge","Tonle Bassac","Tror Khmer CKC","Lorry Eatery BTK","Jolina KTG","Dai Oun TPR","The Clay LK","Bopha TK","Lorry Eatery TTP","Kratie Eel","Heng Kimhong","Hoy Hoy CHM","Sou Sdey Vien Tien BK","Meatball 333","Other (specify)"];
+    const supplierList = ["Chen Khmao","Yeay Sar (Kg Thom)","Mit Pao (Kg Chhnang)","PP Beef","Mean Mot (Krakor)","PP SC","Other (specify)"];
+    const expenseTypes = ["Freight Out","Fuel Cost","Labor Cost","Miscellaneous","Other (specify)"];
+
+    function createDropdownWithOther(list, cssClass) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex gap-2 flex-1';
+      const select = document.createElement('select');
+      select.className = 'flex-1 p-1 border rounded '+cssClass+' bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      for (const item of list) {
+        const opt = document.createElement('option'); opt.value = item; opt.textContent = item; select.appendChild(opt);
+      }
+      const otherInput = document.createElement('input');
+      otherInput.type = 'text'; otherInput.placeholder = 'Specify';
+      otherInput.className = 'hidden flex-1 p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      select.addEventListener('change', () => { otherInput.classList.toggle('hidden', select.value !== 'Other (specify)'); });
+      wrapper.appendChild(select); wrapper.appendChild(otherInput);
+      return { wrapper, select, otherInput };
+    }
+
+    function addSale() {
+      const row = document.createElement('tr');
+      const { wrapper } = createDropdownWithOther(customerList, 'saleSelect');
+      const tdName = document.createElement('td'); tdName.className = 'border px-2 py-1 dark:border-gray-600'; tdName.appendChild(wrapper);
+      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
+      const amt = document.createElement('input');
+      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
+      amt.className='w-full p-1 border rounded text-right saleAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      amt.addEventListener('input', calculateTotals);
+      tdAmt.appendChild(amt);
+      row.appendChild(tdName); row.appendChild(tdAmt);
+      $('#salesContainer').appendChild(row); amt.focus();
+    }
+
+    function addPurchase() {
+      const row = document.createElement('tr');
+      const { wrapper } = createDropdownWithOther(supplierList, 'purchaseSelect');
+      const tdName = document.createElement('td'); tdName.className = 'border px-2 py-1 dark:border-gray-600'; tdName.appendChild(wrapper);
+      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
+      const amt = document.createElement('input');
+      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
+      amt.className='w-full p-1 border rounded text-right purchaseAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      amt.addEventListener('input', calculateTotals);
+      tdAmt.appendChild(amt);
+      row.appendChild(tdName); row.appendChild(tdAmt);
+      $('#purchaseContainer').appendChild(row); amt.focus();
+    }
+
+    function addExpense() {
+      const row = document.createElement('tr');
+      const { wrapper } = createDropdownWithOther(expenseTypes, 'expenseSelect');
+      const tdType = document.createElement('td'); tdType.className = 'border px-2 py-1 dark:border-gray-600'; tdType.appendChild(wrapper);
+      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
+      const amt = document.createElement('input');
+      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
+      amt.className='w-full p-1 border rounded text-right expenseAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      amt.addEventListener('input', calculateTotals);
+      tdAmt.appendChild(amt);
+      const tdNote = document.createElement('td'); tdNote.className = 'border px-2 py-1 dark:border-gray-600';
+      const note = document.createElement('input');
+      note.type='text'; note.placeholder='Name/Note';
+      note.className='w-full p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      tdNote.appendChild(note);
+      row.appendChild(tdType); row.appendChild(tdAmt); row.appendChild(tdNote);
+      $('#expenseContainer').appendChild(row); amt.focus();
+    }
+
+    function calculateTotals() {
+      const nsum = (nodes) => nodes.reduce((s, n) => s + Number(n.value || 0), 0);
+      const totalSales = nsum($$('.saleAmount'));
+      const totalPurchases = nsum($$('.purchaseAmount'));
+      const totalExpenses = nsum($$('.expenseAmount'));
+
+      $('#totalSales').textContent = totalSales.toLocaleString();
+      $('#totalPurchases').textContent = totalPurchases.toLocaleString();
+      $('#totalExpenses').textContent = totalExpenses.toLocaleString();
+
+      const profit = totalSales - totalPurchases - totalExpenses;
+      const transfer = totalPurchases + totalExpenses;
+
+      const profitEl = $('#totalProfit');
+      profitEl.textContent = profit.toLocaleString() + ' ៛';
+      profitEl.className = "font-bold " + (profit > 0 ? "text-green-600" : profit < 0 ? "text-red-600" : "text-gray-600");
+
+      $('#totalTransfer').textContent = transfer.toLocaleString() + ' ៛';
+
+      localStorage.setItem('pettyCashBalance', $('#pettyCash').value || '');
+      $('#pettyCashPrint').textContent = ($('#pettyCash').value || '0');
+
+      saveReportData();
+    }
+
+    function saveReportData() {
+      const data = {
+        date: $('#reportDate').value,
+        pettyCash: $('#pettyCash').value,
+        sales: [],
+        purchases: [],
+        expenses: []
+      };
+      $$('#salesContainer tr').forEach(row => {
+        data.sales.push({
+          name: row.querySelector('select').value,
+          other: row.querySelector('input[type=text]')?.value || "",
+          amount: row.querySelector('.saleAmount').value || ""
+        });
+      });
+      $$('#purchaseContainer tr').forEach(row => {
+        data.purchases.push({
+          name: row.querySelector('select').value,
+          other: row.querySelector('input[type=text]')?.value || "",
+          amount: row.querySelector('.purchaseAmount').value || ""
+        });
+      });
+      $$('#expenseContainer tr').forEach(row => {
+        data.expenses.push({
+          name: row.querySelector('select').value,
+          other: row.querySelector('input[type=text]')?.value || "",
+          amount: row.querySelector('.expenseAmount').value || "",
+          note: row.querySelector('input[placeholder="Name/Note"]').value || ""
+        });
+      });
+      localStorage.setItem("dailyReportData", JSON.stringify(data));
+    }
+
+    // --- Image Save ---
+    async function saveAsImage(){
+      const reportCard = document.getElementById("reportCard");
+      document.body.classList.add("capture-mode");
+      const canvas = await html2canvas(reportCard, { scale: 2 });
+      document.body.classList.remove("capture-mode");
+      const a = document.createElement('a');
+      const date = document.getElementById("reportDate").value || new Date().toISOString().slice(0,10);
+      a.href = canvas.toDataURL('image/png');
+      a.download = `Daily_Report_${date}.png`;
+      a.click();
+    }
+
+    // --- Telegram Share ---
+    async function shareToTelegram() {
+      const tokenEl = document.getElementById("tgBotToken");
+      const chatEl = document.getElementById("tgChatId");
+      const includeCaptionEl = document.getElementById("tgIncludeCaption");
+      if(!tokenEl || !chatEl){ alert('Telegram settings are missing.'); return; }
+      const token = tokenEl.value;
+      const chatId = chatEl.value;
+      const includeCaption = !!(includeCaptionEl && includeCaptionEl.checked);
+
+      const reportCard = document.getElementById("reportCard");
+      document.body.classList.add("capture-mode");
+      const canvas = await html2canvas(reportCard, { scale: 2 });
+      document.body.classList.remove("capture-mode");
+      const blob = await (await fetch(canvas.toDataURL("image/png"))).blob();
+
+      const formData = new FormData();
+      formData.append("chat_id", chatId);
+      if (includeCaption) formData.append("caption", getCaptionString());
+      formData.append("photo", blob, "report.png");
+
+      try {
+        const resp = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: "POST", body: formData });
+        const result = await resp.json();
+        if (!result.ok) alert("❌ Failed: " + result.description); else alert("✅ Sent to Telegram!");
+      } catch (e) { alert("❌ Error: " + e.message); }
+    }
+
+    function getCaptionString(){
+      const date = document.getElementById("reportDate").value || new Date().toLocaleDateString();
+      return `📊 Daily Sales Report\nDate: ${date}\nA=${document.getElementById("totalSales").textContent}\nB=${document.getElementById("totalPurchases").textContent}\nC=${document.getElementById("totalExpenses").textContent}\nD=${document.getElementById("totalProfit").textContent}\nE=${document.getElementById("totalTransfer").textContent}`;
+    }
+
+    // --- Diagnostics ---
+    function runDiagnostics(){
+      const requiredIds = [
+        'btnShareTelegram','btnSaveImage','btnPrint','btnClearReport',
+        'reportCard','reportDate','salesContainer','purchaseContainer','expenseContainer',
+        'totalSales','totalPurchases','totalExpenses','totalProfit','totalTransfer',
+        'tgBotToken','tgChatId','tgIncludeCaption'
+      ];
+      const list = document.getElementById('diagList');
+      list.innerHTML = '';
+      requiredIds.forEach(id => {
+        const li = document.createElement('li');
+        const ok = !!document.getElementById(id);
+        li.textContent = `${id}: ${ok ? 'OK' : 'MISSING'}`;
+        li.className = ok ? 'text-green-600' : 'text-red-600';
+        list.appendChild(li);
+      });
+    }
+
+    // --- Init after DOM is ready (prevents null addEventListener errors) ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wire buttons safely
+      const shareBtn = document.getElementById('btnShareTelegram');
+      const imgBtn = document.getElementById('btnSaveImage');
+      const printBtn = document.getElementById('btnPrint');
+      const clearBtn = document.getElementById('btnClearReport');
+      const diagBtn = document.getElementById('btnRunDiagnostics');
+
+      if (shareBtn) shareBtn.addEventListener('click', shareToTelegram);
+      if (imgBtn) imgBtn.addEventListener('click', saveAsImage);
+      if (printBtn) printBtn.addEventListener('click', () => window.print());
+      if (clearBtn) clearBtn.addEventListener('click', () => { if(confirm('Clear all saved data?')) { localStorage.removeItem('dailyReportData'); location.reload(); }});
+      if (diagBtn) diagBtn.addEventListener('click', runDiagnostics);
+
+      // Pre-fill Telegram defaults
+      const tokenEl = document.getElementById('tgBotToken');
+      const chatEl = document.getElementById('tgChatId');
+      if (tokenEl) tokenEl.value = "7983427142:AAHZu8g4e4YSqthm-S1p0cK_b_dF8JKZs3s";
+      if (chatEl) chatEl.value = "-1002294431631";
+      localStorage.setItem('tgBotToken', tokenEl?.value || '');
+      localStorage.setItem('tgChatId', chatEl?.value || '');
+
+      // Dark mode toggle
+      const toggle = document.getElementById("darkModeToggle"), track=document.getElementById("darkToggleTrack"), thumb=document.getElementById("darkToggleThumb");
+      const savedDark = localStorage.getItem("darkMode");
+      if(savedDark==="1"){ document.documentElement.classList.add("dark"); if(toggle){ toggle.checked=true; track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); } }
+      if (toggle) toggle.addEventListener("change",()=>{ if(toggle.checked){ document.documentElement.classList.add("dark"); localStorage.setItem("darkMode","1"); track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); } else { document.documentElement.classList.remove("dark"); localStorage.setItem("darkMode","0"); track.classList.replace("bg-blue-600","bg-gray-300"); thumb.classList.remove("translate-x-5"); }});
+
+      // Seed first rows if empty
+      if (!$('#salesContainer').children.length) addSale();
+      if (!$('#purchaseContainer').children.length) addPurchase();
+      if (!$('#expenseContainer').children.length) addExpense();
+
+      calculateTotals();
+      runDiagnostics(); // run once on load
+    });
   </script>
 </body>
 </html>
