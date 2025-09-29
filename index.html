@@ -12,7 +12,7 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- html2canvas for PNG capture -->
+  <!-- html2canvas -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
@@ -34,7 +34,7 @@
 <body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 p-4">
   <div id="reportCard" class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">
 
-    <!-- Sticky Header -->
+    <!-- Header -->
     <div class="sticky top-0 bg-white dark:bg-gray-800 z-20 pb-2 border-b border-gray-200 dark:border-gray-700">
       <h1 class="text-2xl font-bold text-center py-2">
         របាយការណ៍ប្រចាំថ្ងៃ<br />
@@ -114,14 +114,13 @@
 
     <!-- Buttons -->
     <div class="mt-4 space-y-2 hidden-print">
-      <!-- Share first -->
       <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded dark:bg-sky-700 dark:hover:bg-sky-600">Share to Telegram</button>
       <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
       <button onclick="window.print()" class="w-full bg-gray-700 text-white py-2 rounded dark:bg-gray-800 dark:hover:bg-gray-600">Print</button>
       <button id="btnClearReport" class="w-full bg-red-500 text-white py-2 rounded dark:bg-red-600 dark:hover:bg-red-500">Clear Report</button>
     </div>
 
-    <!-- Telegram Settings (pre-filled) -->
+    <!-- Telegram Settings -->
     <div class="screen-only mt-4 p-3 border rounded space-y-2 dark:border-gray-700 dark:bg-gray-800">
       <div class="text-sm font-semibold">Telegram Settings</div>
       <input id="tgBotToken" type="password"
@@ -134,7 +133,6 @@
         <input id="tgIncludeCaption" type="checkbox" class="w-4 h-4" checked />
         <span>Include caption (A/B/C/D/E totals) when sharing</span>
       </label>
-      <p class="text-xs text-gray-500 dark:text-gray-400">Pre-configured for Khmer Flavor Mart group.</p>
     </div>
   </div>
 
@@ -143,11 +141,10 @@
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-    // PNG Save
+    // Save as PNG
     function saveAsImage() {
       const card = document.getElementById("reportCard");
       document.body.classList.add("capture-mode");
-
       html2canvas(card, { scale: 2 }).then(canvas => {
         document.body.classList.remove("capture-mode");
         const link = document.createElement("a");
@@ -178,25 +175,27 @@ E: Transfer = ${document.getElementById("totalTransfer").textContent}` : "";
 
       html2canvas(card, { scale: 2 }).then(canvas => {
         document.body.classList.remove("capture-mode");
-        const photoData = canvas.toDataURL("image/png");
 
-        fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
-          method: "POST",
-          body: new URLSearchParams({
-            chat_id: chatId,
-            caption: caption,
-            photo: photoData
+        canvas.toBlob(blob => {
+          const formData = new FormData();
+          formData.append("chat_id", chatId);
+          formData.append("caption", caption);
+          formData.append("photo", blob, "report.png");
+
+          fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+            method: "POST",
+            body: formData
           })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.ok) {
-            alert("✅ Report sent to Telegram group!");
-          } else {
-            alert("❌ Failed: " + data.description);
-          }
-        })
-        .catch(err => alert("Error: " + err.message));
+          .then(res => res.json())
+          .then(data => {
+            if (data.ok) {
+              alert("✅ Report sent to Telegram group!");
+            } else {
+              alert("❌ Failed: " + data.description);
+            }
+          })
+          .catch(err => alert("Error: " + err.message));
+        }, "image/png");
       });
     }
     document.getElementById("btnShareTelegram").addEventListener("click", shareToTelegram);
