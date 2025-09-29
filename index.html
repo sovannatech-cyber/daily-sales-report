@@ -6,15 +6,14 @@
   <meta name="theme-color" content="#0ea5e9" />
   <title>Daily Sales Report</title>
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png" type="image/png">
-
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <!-- Khmer Font -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- html2canvas for PNG capture -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
     body { font-family: 'Noto Sans Khmer', sans-serif; }
@@ -24,9 +23,6 @@
       button, .hidden-print, .screen-only { display: none !important; }
       .print-only { display: block !important; }
       body { background: #fff; }
-      .shadow, .rounded-2xl, .bg-white, .dark\:bg-gray-900 { 
-        box-shadow: none !important; border-radius: 0 !important; background: #fff !important; 
-      }
     }
     .capture-mode button,
     .capture-mode .hidden-print,
@@ -122,7 +118,6 @@
       <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded dark:bg-sky-700 dark:hover:bg-sky-600">Share to Telegram</button>
       <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
       <button onclick="window.print()" class="w-full bg-gray-700 text-white py-2 rounded dark:bg-gray-800 dark:hover:bg-gray-600">Print</button>
-      <button id="btnInstall" class="w-full bg-indigo-600 text-white py-2 rounded hidden dark:bg-indigo-700 dark:hover:bg-indigo-600">Install App</button>
       <button id="btnClearReport" class="w-full bg-red-500 text-white py-2 rounded dark:bg-red-600 dark:hover:bg-red-500">Clear Report</button>
     </div>
 
@@ -141,188 +136,70 @@
       </label>
       <p class="text-xs text-gray-500 dark:text-gray-400">Pre-configured for Khmer Flavor Mart group.</p>
     </div>
-
-    <!-- Dark Mode Toggle -->
-    <div class="screen-only mt-4 p-3 border rounded dark:border-gray-700 dark:bg-gray-800">
-      <div class="flex justify-between items-center">
-        <span class="text-sm font-semibold">Dark Mode</span>
-        <label class="inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="darkModeToggle" class="sr-only">
-          <span class="w-10 h-5 bg-gray-300 rounded-full shadow-inner flex items-center px-1 transition-colors duration-300" id="darkToggleTrack">
-            <span class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300" id="darkToggleThumb"></span>
-          </span>
-        </label>
-      </div>
-    </div>
   </div>
 
   <!-- JS -->
   <script>
-    // Helpers
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-    const customerList = ["General Customer","The Waters BK","The Woods LK","La Fashion BK","La Fashion LK","La Fashion BK/porridge","Tonle Bassac","Tror Khmer CKC","Lorry Eatery BTK","Jolina KTG","Dai Oun TPR","The Clay LK","Bopha TK","Lorry Eatery TTP","Kratie Eel","Heng Kimhong","Hoy Hoy CHM","Sou Sdey Vien Tien BK","Meatball 333","Other (specify)"];
-    const supplierList = ["Chen Khmao","Yeay Sar (Kg Thom)","Mit Pao (Kg Chhnang)","PP Beef","Mean Mot (Krakor)","PP SC","Other (specify)"];
-    const expenseTypes = ["Freight Out","Fuel Cost","Labor Cost","Miscellaneous","Other (specify)"];
+    // PNG Save
+    function saveAsImage() {
+      const card = document.getElementById("reportCard");
+      document.body.classList.add("capture-mode");
 
-    // Dropdown helper
-    function createDropdownWithOther(list, cssClass) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'flex gap-2 flex-1';
-      const select = document.createElement('select');
-      select.className = 'flex-1 p-1 border rounded '+cssClass+' bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
-      for (const item of list) {
-        const opt = document.createElement('option'); opt.value = item; opt.textContent = item; select.appendChild(opt);
-      }
-      const otherInput = document.createElement('input');
-      otherInput.type = 'text'; otherInput.placeholder = 'Specify';
-      otherInput.className = 'hidden flex-1 p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
-      select.addEventListener('change', () => { otherInput.classList.toggle('hidden', select.value !== 'Other (specify)'); });
-      wrapper.appendChild(select); wrapper.appendChild(otherInput);
-      return { wrapper, select, otherInput };
-    }
-
-    // Row builders
-    function addSale() {
-      const row = document.createElement('tr');
-      const { wrapper } = createDropdownWithOther(customerList, 'saleSelect');
-      const tdName = document.createElement('td'); tdName.className = 'border px-2 py-1 dark:border-gray-600'; tdName.appendChild(wrapper);
-      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
-      const amt = document.createElement('input');
-      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
-      amt.className='w-full p-1 border rounded text-right saleAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
-      amt.addEventListener('input', calculateTotals);
-      tdAmt.appendChild(amt);
-      row.appendChild(tdName); row.appendChild(tdAmt);
-      $('#salesContainer').appendChild(row); amt.focus();
-    }
-
-    function addPurchase() {
-      const row = document.createElement('tr');
-      const { wrapper } = createDropdownWithOther(supplierList, 'purchaseSelect');
-      const tdName = document.createElement('td'); tdName.className = 'border px-2 py-1 dark:border-gray-600'; tdName.appendChild(wrapper);
-      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
-      const amt = document.createElement('input');
-      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
-      amt.className='w-full p-1 border rounded text-right purchaseAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
-      amt.addEventListener('input', calculateTotals);
-      tdAmt.appendChild(amt);
-      row.appendChild(tdName); row.appendChild(tdAmt);
-      $('#purchaseContainer').appendChild(row); amt.focus();
-    }
-
-    function addExpense() {
-      const row = document.createElement('tr');
-      const { wrapper } = createDropdownWithOther(expenseTypes, 'expenseSelect');
-      const tdType = document.createElement('td'); tdType.className = 'border px-2 py-1 dark:border-gray-600'; tdType.appendChild(wrapper);
-      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
-      const amt = document.createElement('input');
-      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
-      amt.className='w-full p-1 border rounded text-right expenseAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
-      amt.addEventListener('input', calculateTotals);
-      tdAmt.appendChild(amt);
-      const tdNote = document.createElement('td'); tdNote.className = 'border px-2 py-1 dark:border-gray-600';
-      const note = document.createElement('input');
-      note.type='text'; note.placeholder='Name/Note';
-      note.className='w-full p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
-      tdNote.appendChild(note);
-      row.appendChild(tdType); row.appendChild(tdAmt); row.appendChild(tdNote);
-      $('#expenseContainer').appendChild(row); amt.focus();
-    }
-
-    // Totals
-    function calculateTotals() {
-      const nsum = (nodes) => nodes.reduce((s, n) => s + Number(n.value || 0), 0);
-      const totalSales = nsum($$('.saleAmount'));
-      const totalPurchases = nsum($$('.purchaseAmount'));
-      const totalExpenses = nsum($$('.expenseAmount'));
-
-      $('#totalSales').textContent = totalSales.toLocaleString();
-      $('#totalPurchases').textContent = totalPurchases.toLocaleString();
-      $('#totalExpenses').textContent = totalExpenses.toLocaleString();
-
-      const profit = totalSales - totalPurchases - totalExpenses;
-      const transfer = totalPurchases + totalExpenses;
-
-      const profitEl = $('#totalProfit');
-      profitEl.textContent = profit.toLocaleString() + ' ៛';
-      profitEl.className = "font-bold " + (profit > 0 ? "text-green-600" : profit < 0 ? "text-red-600" : "text-gray-600");
-
-      $('#totalTransfer').textContent = transfer.toLocaleString() + ' ៛';
-
-      localStorage.setItem('pettyCashBalance', $('#pettyCash').value || '');
-      $('#pettyCashPrint').textContent = ($('#pettyCash').value || '0');
-
-      saveReportData();
-    }
-
-    // Save/Restore
-    function saveReportData() {
-      const data = {
-        date: $('#reportDate').value,
-        pettyCash: $('#pettyCash').value,
-        sales: [],
-        purchases: [],
-        expenses: []
-      };
-      $$('#salesContainer tr').forEach(row => {
-        data.sales.push({
-          name: row.querySelector('select').value,
-          other: row.querySelector('input[type=text]')?.value || "",
-          amount: row.querySelector('.saleAmount').value || ""
-        });
+      html2canvas(card, { scale: 2 }).then(canvas => {
+        document.body.classList.remove("capture-mode");
+        const link = document.createElement("a");
+        link.download = "DailySalesReport.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
       });
-      $$('#purchaseContainer tr').forEach(row => {
-        data.purchases.push({
-          name: row.querySelector('select').value,
-          other: row.querySelector('input[type=text]')?.value || "",
-          amount: row.querySelector('.purchaseAmount').value || ""
-        });
-      });
-      $$('#expenseContainer tr').forEach(row => {
-        data.expenses.push({
-          name: row.querySelector('select').value,
-          other: row.querySelector('input[type=text]')?.value || "",
-          amount: row.querySelector('.expenseAmount').value || "",
-          note: row.querySelector('input[placeholder="Name/Note"]').value || ""
-        });
-      });
-      localStorage.setItem("dailyReportData", JSON.stringify(data));
     }
+    document.getElementById("btnSaveImage").addEventListener("click", saveAsImage);
 
-    // Init
-    (function init(){
-      document.getElementById('btnAddSale').addEventListener('click', addSale);
-      document.getElementById('btnAddPurchase').addEventListener('click', addPurchase);
-      document.getElementById('btnAddExpense').addEventListener('click', addExpense);
+    // Share to Telegram
+    function shareToTelegram() {
+      const token = document.getElementById("tgBotToken").value;
+      const chatId = document.getElementById("tgChatId").value;
+      const includeCaption = document.getElementById("tgIncludeCaption").checked;
+      const dateVal = document.getElementById("reportDate").value || "Today";
 
-      const saved = localStorage.getItem("dailyReportData");
-      if(saved){
-        const data = JSON.parse(saved);
-        if(data.date) $('#reportDate').value = data.date;
-        if(data.pettyCash) $('#pettyCash').value = data.pettyCash;
-        $('#salesContainer').innerHTML=''; $('#purchaseContainer').innerHTML=''; $('#expenseContainer').innerHTML='';
-        data.sales.forEach(i => { addSale(); let r=$$('#salesContainer tr').slice(-1)[0]; r.querySelector('select').value=i.name; if(i.name==="Other (specify)") r.querySelector('input[type=text]').value=i.other; r.querySelector('.saleAmount').value=i.amount; });
-        data.purchases.forEach(i => { addPurchase(); let r=$$('#purchaseContainer tr').slice(-1)[0]; r.querySelector('select').value=i.name; if(i.name==="Other (specify)") r.querySelector('input[type=text]').value=i.other; r.querySelector('.purchaseAmount').value=i.amount; });
-        data.expenses.forEach(i => { addExpense(); let r=$$('#expenseContainer tr').slice(-1)[0]; r.querySelector('select').value=i.name; if(i.name==="Other (specify)") r.querySelector('input[type=text]').value=i.other; r.querySelector('.expenseAmount').value=i.amount; r.querySelector('input[placeholder="Name/Note"]').value=i.note; });
-      } else { addSale(); addPurchase(); addExpense(); }
-      calculateTotals();
+      const caption = includeCaption ?
+        `📊 Daily Sales Report (${dateVal})
+A: Sales = ${document.getElementById("totalSales").textContent} ៛
+B: Purchases = ${document.getElementById("totalPurchases").textContent} ៛
+C: Expenses = ${document.getElementById("totalExpenses").textContent} ៛
+D: Profit = ${document.getElementById("totalProfit").textContent}
+E: Transfer = ${document.getElementById("totalTransfer").textContent}` : "";
 
-      document.getElementById('btnClearReport').addEventListener('click', ()=>{ if(confirm("Clear all saved data?")){ localStorage.removeItem("dailyReportData"); location.reload(); }});
+      const card = document.getElementById("reportCard");
+      document.body.classList.add("capture-mode");
 
-      // Dark mode toggle
-      const toggle = document.getElementById("darkModeToggle"), track=document.getElementById("darkToggleTrack"), thumb=document.getElementById("darkToggleThumb");
-      const savedDark = localStorage.getItem("darkMode");
-      if(savedDark==="1"){ document.documentElement.classList.add("dark"); toggle.checked=true; track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); }
-      toggle.addEventListener("change",()=>{ if(toggle.checked){ document.documentElement.classList.add("dark"); localStorage.setItem("darkMode","1"); track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); } else { document.documentElement.classList.remove("dark"); localStorage.setItem("darkMode","0"); track.classList.replace("bg-blue-600","bg-gray-300"); thumb.classList.remove("translate-x-5"); }});
+      html2canvas(card, { scale: 2 }).then(canvas => {
+        document.body.classList.remove("capture-mode");
+        const photoData = canvas.toDataURL("image/png");
 
-      // Telegram defaults
-      document.getElementById("tgBotToken").value = "7983427142:AAHZu8g4e4YSqthm-S1p0cK_b_dF8JKZs3s";
-      document.getElementById("tgChatId").value = "-1002294431631";
-      localStorage.setItem("tgBotToken","7983427142:AAHZu8g4e4YSqthm-S1p0cK_b_dF8JKZs3s");
-      localStorage.setItem("tgChatId","-1002294431631");
-    })();
+        fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+          method: "POST",
+          body: new URLSearchParams({
+            chat_id: chatId,
+            caption: caption,
+            photo: photoData
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok) {
+            alert("✅ Report sent to Telegram group!");
+          } else {
+            alert("❌ Failed: " + data.description);
+          }
+        })
+        .catch(err => alert("Error: " + err.message));
+      });
+    }
+    document.getElementById("btnShareTelegram").addEventListener("click", shareToTelegram);
   </script>
 </body>
 </html>
