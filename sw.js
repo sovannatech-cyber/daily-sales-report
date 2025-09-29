@@ -1,22 +1,22 @@
-// sw.js - Daily Sales Report PWA Service Worker
-
-const CACHE_NAME = "daily-sales-v1";
+// sw.js - Khmer Flavor Mart PWA
+const CACHE_NAME = "kfm-sales-v1";
 const ASSETS = [
   "/",
-  "/index.html"
+  "/index.html",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png"
 ];
 
-// Install - cache files
+// Install
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate - clean old caches
+// Activate
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -26,7 +26,7 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch - network first, fallback to cache
+// Fetch
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
