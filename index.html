@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0ea5e9" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Daily Sales Report</title>
 
   <!-- Khmer Font -->
@@ -116,24 +114,28 @@
 
     <!-- Buttons -->
     <div class="mt-4 space-y-2 hidden-print">
-      <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
+      <!-- Share first -->
       <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded dark:bg-sky-700 dark:hover:bg-sky-600">Share to Telegram</button>
+      <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
       <button onclick="window.print()" class="w-full bg-gray-700 text-white py-2 rounded dark:bg-gray-800 dark:hover:bg-gray-600">Print</button>
       <button id="btnInstall" class="w-full bg-indigo-600 text-white py-2 rounded hidden dark:bg-indigo-700 dark:hover:bg-indigo-600">Install App</button>
       <button id="btnClearReport" class="w-full bg-red-500 text-white py-2 rounded dark:bg-red-600 dark:hover:bg-red-500">Clear Report</button>
     </div>
 
-    <!-- Telegram Settings -->
+    <!-- Telegram Settings (pre-filled) -->
     <div class="screen-only mt-4 p-3 border rounded space-y-2 dark:border-gray-700 dark:bg-gray-800">
       <div class="text-sm font-semibold">Telegram Settings</div>
-      <input id="tgBotToken" type="password" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-             placeholder="Bot Token (kept locally)" />
-      <input id="tgChatId" type="text" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-             placeholder="Group Chat ID (e.g., -1001234567890)" />
+      <input id="tgBotToken" type="password"
+        class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        value="7983427142:AAHZu8g4e4YSqthm-S1p0cK_b_dF8JKZs3s" readonly />
+      <input id="tgChatId" type="text"
+        class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        value="-1002294431631" readonly />
       <label class="flex items-center gap-2 text-sm">
-        <input id="tgIncludeCaption" type="checkbox" class="w-4 h-4" />
+        <input id="tgIncludeCaption" type="checkbox" class="w-4 h-4" checked />
         <span>Include caption (A/B/C/D/E totals) when sharing</span>
       </label>
+      <p class="text-xs text-gray-500 dark:text-gray-400">Pre-configured for Khmer Flavor Mart group.</p>
     </div>
 
     <!-- Dark Mode Toggle -->
@@ -152,6 +154,7 @@
 
   <!-- JS -->
   <script>
+    // Helpers
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
@@ -159,6 +162,7 @@
     const supplierList = ["Chen Khmao","Yeay Sar (Kg Thom)","Mit Pao (Kg Chhnang)","PP Beef","Mean Mot (Krakor)","PP SC","Other (specify)"];
     const expenseTypes = ["Freight Out","Fuel Cost","Labor Cost","Miscellaneous","Other (specify)"];
 
+    // Dropdown helper
     function createDropdownWithOther(list, cssClass) {
       const wrapper = document.createElement('div');
       wrapper.className = 'flex gap-2 flex-1';
@@ -175,6 +179,7 @@
       return { wrapper, select, otherInput };
     }
 
+    // Row builders
     function addSale() {
       const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(customerList, 'saleSelect');
@@ -186,8 +191,7 @@
       amt.addEventListener('input', calculateTotals);
       tdAmt.appendChild(amt);
       row.appendChild(tdName); row.appendChild(tdAmt);
-      $('#salesContainer').appendChild(row);
-      amt.focus();
+      $('#salesContainer').appendChild(row); amt.focus();
     }
 
     function addPurchase() {
@@ -201,8 +205,7 @@
       amt.addEventListener('input', calculateTotals);
       tdAmt.appendChild(amt);
       row.appendChild(tdName); row.appendChild(tdAmt);
-      $('#purchaseContainer').appendChild(row);
-      amt.focus();
+      $('#purchaseContainer').appendChild(row); amt.focus();
     }
 
     function addExpense() {
@@ -221,10 +224,10 @@
       note.className='w-full p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
       tdNote.appendChild(note);
       row.appendChild(tdType); row.appendChild(tdAmt); row.appendChild(tdNote);
-      $('#expenseContainer').appendChild(row);
-      amt.focus();
+      $('#expenseContainer').appendChild(row); amt.focus();
     }
 
+    // Totals
     function calculateTotals() {
       const nsum = (nodes) => nodes.reduce((s, n) => s + Number(n.value || 0), 0);
       const totalSales = nsum($$('.saleAmount'));
@@ -250,6 +253,7 @@
       saveReportData();
     }
 
+    // Save/Restore
     function saveReportData() {
       const data = {
         date: $('#reportDate').value,
@@ -283,6 +287,7 @@
       localStorage.setItem("dailyReportData", JSON.stringify(data));
     }
 
+    // Init
     (function init(){
       document.getElementById('btnAddSale').addEventListener('click', addSale);
       document.getElementById('btnAddPurchase').addEventListener('click', addPurchase);
@@ -307,6 +312,12 @@
       const savedDark = localStorage.getItem("darkMode");
       if(savedDark==="1"){ document.documentElement.classList.add("dark"); toggle.checked=true; track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); }
       toggle.addEventListener("change",()=>{ if(toggle.checked){ document.documentElement.classList.add("dark"); localStorage.setItem("darkMode","1"); track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); } else { document.documentElement.classList.remove("dark"); localStorage.setItem("darkMode","0"); track.classList.replace("bg-blue-600","bg-gray-300"); thumb.classList.remove("translate-x-5"); }});
+
+      // Telegram defaults
+      document.getElementById("tgBotToken").value = "7983427142:AAHZu8g4e4YSqthm-S1p0cK_b_dF8JKZs3s";
+      document.getElementById("tgChatId").value = "-1002294431631";
+      localStorage.setItem("tgBotToken","7983427142:AAHZu8g4e4YSqthm-S1p0cK_b_dF8JKZs3s");
+      localStorage.setItem("tgChatId","-1002294431631");
     })();
   </script>
 </body>
