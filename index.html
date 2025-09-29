@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,8 +7,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Daily Sales Report</title>
+
+  <!-- Khmer Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
+    body { font-family: 'Noto Sans Khmer', sans-serif; }
     .print-only { display: none; }
     .screen-only { display: block; }
     @media print {
@@ -25,6 +32,7 @@
     .capture-mode .print-only { display: block !important; }
   </style>
 </head>
+
 <body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 p-4">
   <div id="reportCard" class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">
 
@@ -36,14 +44,13 @@
       </h1>
       <div class="mb-2 flex justify-between items-center">
         <label class="text-sm">កាលបរិច្ឆេទ (Date)</label>
-        <input type="date" class="p-1 border rounded screen-only
-               bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-               id="reportDate" />
+        <input type="date" id="reportDate"
+          class="p-1 border rounded screen-only bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
         <div class="print-only text-sm mt-1">Date: <span id="dateFormattedPrint">—</span></div>
       </div>
     </div>
 
-    <!-- Sales Section -->
+    <!-- Sales -->
     <h2 class="text-xl font-semibold mb-2 mt-4">I. ការលក់ (Sales)</h2>
     <table class="w-full border text-sm mb-3 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
       <thead class="bg-gray-100 dark:bg-gray-700">
@@ -58,7 +65,7 @@
            dark:bg-blue-600 dark:hover:bg-blue-500">➕ Customer</button>
     <div class="mt-2 font-bold">សរុបការលក់ (A) Total Sales: <span id="totalSales">0</span> ៛</div>
 
-    <!-- Purchases Section -->
+    <!-- Purchases -->
     <h2 class="text-xl font-semibold mt-6 mb-2">II. ការទិញ (Purchases)</h2>
     <table class="w-full border text-sm mb-3 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
       <thead class="bg-gray-100 dark:bg-gray-700">
@@ -73,7 +80,7 @@
            dark:bg-green-600 dark:hover:bg-green-500">📦 Supplier</button>
     <div class="mt-2 font-bold">សរុបការទិញ (B) Total Purchases: <span id="totalPurchases">0</span> ៛</div>
 
-    <!-- Expenses Section -->
+    <!-- Expenses -->
     <h2 class="text-xl font-semibold mt-6 mb-2">III. ការចំណាយ (Expenses)</h2>
     <table class="w-full border text-sm mb-3 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
       <thead class="bg-gray-100 dark:bg-gray-700">
@@ -89,7 +96,7 @@
            dark:bg-yellow-600 dark:hover:bg-yellow-500">💰 Expense</button>
     <div class="mt-2 font-bold">សរុបចំណាយ (C) Total Expenses: <span id="totalExpenses">0</span> ៛</div>
 
-    <!-- Combined Totals -->
+    <!-- Totals -->
     <div class="mt-6 space-y-2">
       <div class="flex justify-between items-center">
         <label class="font-semibold">IV. ចំណេញសរុប (D=A-B-C) Total Profit:</label>
@@ -101,14 +108,13 @@
       </div>
       <div class="flex justify-between items-center">
         <label class="font-semibold">VI. ប្រាក់កក់ (F) Petty Cash Balance:</label>
-        <input type="number" id="pettyCash" 
-               class="w-32 p-2 border rounded text-right screen-only
-                      bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+        <input type="number" id="pettyCash"
+               class="w-32 p-2 border rounded text-right screen-only bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
         <span class="print-only" id="pettyCashPrint">0</span>
       </div>
     </div>
 
-    <!-- Export / Share Buttons -->
+    <!-- Buttons -->
     <div class="mt-4 space-y-2 hidden-print">
       <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
       <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded dark:bg-sky-700 dark:hover:bg-sky-600">Share to Telegram</button>
@@ -117,14 +123,12 @@
       <button id="btnClearReport" class="w-full bg-red-500 text-white py-2 rounded dark:bg-red-600 dark:hover:bg-red-500">Clear Report</button>
     </div>
 
-    <!-- Telegram Bot Settings (screen only) -->
+    <!-- Telegram Settings -->
     <div class="screen-only mt-4 p-3 border rounded space-y-2 dark:border-gray-700 dark:bg-gray-800">
       <div class="text-sm font-semibold">Telegram Settings</div>
-      <input id="tgBotToken" type="password" class="w-full p-2 border rounded
-             bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+      <input id="tgBotToken" type="password" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
              placeholder="Bot Token (kept locally)" />
-      <input id="tgChatId" type="text" class="w-full p-2 border rounded
-             bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+      <input id="tgChatId" type="text" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
              placeholder="Group Chat ID (e.g., -1001234567890)" />
       <label class="flex items-center gap-2 text-sm">
         <input id="tgIncludeCaption" type="checkbox" class="w-4 h-4" />
@@ -138,25 +142,22 @@
         <span class="text-sm font-semibold">Dark Mode</span>
         <label class="inline-flex items-center cursor-pointer">
           <input type="checkbox" id="darkModeToggle" class="sr-only">
-          <span class="w-10 h-5 bg-gray-300 rounded-full shadow-inner flex items-center px-1 transition-colors duration-300"
-                id="darkToggleTrack">
-            <span class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300"
-                  id="darkToggleThumb"></span>
+          <span class="w-10 h-5 bg-gray-300 rounded-full shadow-inner flex items-center px-1 transition-colors duration-300" id="darkToggleTrack">
+            <span class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300" id="darkToggleThumb"></span>
           </span>
         </label>
       </div>
     </div>
   </div>
 
+  <!-- JS -->
   <script>
-    // --- Lists ---
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
     const customerList = ["General Customer","The Waters BK","The Woods LK","La Fashion BK","La Fashion LK","La Fashion BK/porridge","Tonle Bassac","Tror Khmer CKC","Lorry Eatery BTK","Jolina KTG","Dai Oun TPR","The Clay LK","Bopha TK","Lorry Eatery TTP","Kratie Eel","Heng Kimhong","Hoy Hoy CHM","Sou Sdey Vien Tien BK","Meatball 333","Other (specify)"];
     const supplierList = ["Chen Khmao","Yeay Sar (Kg Thom)","Mit Pao (Kg Chhnang)","PP Beef","Mean Mot (Krakor)","PP SC","Other (specify)"];
     const expenseTypes = ["Freight Out","Fuel Cost","Labor Cost","Miscellaneous","Other (specify)"];
-
-    // --- Helpers ---
-    const $ = (sel, root=document) => root.querySelector(sel);
-    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
     function createDropdownWithOther(list, cssClass) {
       const wrapper = document.createElement('div');
@@ -174,7 +175,6 @@
       return { wrapper, select, otherInput };
     }
 
-    // --- Add Rows (Table-style) ---
     function addSale() {
       const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(customerList, 'saleSelect');
@@ -189,6 +189,7 @@
       $('#salesContainer').appendChild(row);
       amt.focus();
     }
+
     function addPurchase() {
       const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(supplierList, 'purchaseSelect');
@@ -203,6 +204,7 @@
       $('#purchaseContainer').appendChild(row);
       amt.focus();
     }
+
     function addExpense() {
       const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(expenseTypes, 'expenseSelect');
@@ -223,7 +225,6 @@
       amt.focus();
     }
 
-    // --- Totals & Save ---
     function calculateTotals() {
       const nsum = (nodes) => nodes.reduce((s, n) => s + Number(n.value || 0), 0);
       const totalSales = nsum($$('.saleAmount'));
@@ -239,8 +240,7 @@
 
       const profitEl = $('#totalProfit');
       profitEl.textContent = profit.toLocaleString() + ' ៛';
-      profitEl.className = "font-bold " +
-        (profit > 0 ? "text-green-600" : profit < 0 ? "text-red-600" : "text-gray-600");
+      profitEl.className = "font-bold " + (profit > 0 ? "text-green-600" : profit < 0 ? "text-red-600" : "text-gray-600");
 
       $('#totalTransfer').textContent = transfer.toLocaleString() + ' ៛';
 
@@ -250,7 +250,6 @@
       saveReportData();
     }
 
-    // --- Save/Restore Data ---
     function saveReportData() {
       const data = {
         date: $('#reportDate').value,
@@ -284,11 +283,31 @@
       localStorage.setItem("dailyReportData", JSON.stringify(data));
     }
 
-    // --- Dark Mode Toggle ---
-    (function setupDarkMode(){
-      const toggle = document.getElementById("darkModeToggle");
-      const track = document.getElementById("darkToggleTrack");
-      const thumb = document.getElementById("darkToggleThumb");
+    (function init(){
+      document.getElementById('btnAddSale').addEventListener('click', addSale);
+      document.getElementById('btnAddPurchase').addEventListener('click', addPurchase);
+      document.getElementById('btnAddExpense').addEventListener('click', addExpense);
 
-      const saved = localStorage.getItem("darkMode");
-      if(saved
+      const saved = localStorage.getItem("dailyReportData");
+      if(saved){
+        const data = JSON.parse(saved);
+        if(data.date) $('#reportDate').value = data.date;
+        if(data.pettyCash) $('#pettyCash').value = data.pettyCash;
+        $('#salesContainer').innerHTML=''; $('#purchaseContainer').innerHTML=''; $('#expenseContainer').innerHTML='';
+        data.sales.forEach(i => { addSale(); let r=$$('#salesContainer tr').slice(-1)[0]; r.querySelector('select').value=i.name; if(i.name==="Other (specify)") r.querySelector('input[type=text]').value=i.other; r.querySelector('.saleAmount').value=i.amount; });
+        data.purchases.forEach(i => { addPurchase(); let r=$$('#purchaseContainer tr').slice(-1)[0]; r.querySelector('select').value=i.name; if(i.name==="Other (specify)") r.querySelector('input[type=text]').value=i.other; r.querySelector('.purchaseAmount').value=i.amount; });
+        data.expenses.forEach(i => { addExpense(); let r=$$('#expenseContainer tr').slice(-1)[0]; r.querySelector('select').value=i.name; if(i.name==="Other (specify)") r.querySelector('input[type=text]').value=i.other; r.querySelector('.expenseAmount').value=i.amount; r.querySelector('input[placeholder="Name/Note"]').value=i.note; });
+      } else { addSale(); addPurchase(); addExpense(); }
+      calculateTotals();
+
+      document.getElementById('btnClearReport').addEventListener('click', ()=>{ if(confirm("Clear all saved data?")){ localStorage.removeItem("dailyReportData"); location.reload(); }});
+
+      // Dark mode toggle
+      const toggle = document.getElementById("darkModeToggle"), track=document.getElementById("darkToggleTrack"), thumb=document.getElementById("darkToggleThumb");
+      const savedDark = localStorage.getItem("darkMode");
+      if(savedDark==="1"){ document.documentElement.classList.add("dark"); toggle.checked=true; track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); }
+      toggle.addEventListener("change",()=>{ if(toggle.checked){ document.documentElement.classList.add("dark"); localStorage.setItem("darkMode","1"); track.classList.replace("bg-gray-300","bg-blue-600"); thumb.classList.add("translate-x-5"); } else { document.documentElement.classList.remove("dark"); localStorage.setItem("darkMode","0"); track.classList.replace("bg-blue-600","bg-gray-300"); thumb.classList.remove("translate-x-5"); }});
+    })();
+  </script>
+</body>
+</html>
