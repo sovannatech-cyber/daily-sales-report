@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,50 +15,85 @@
       button, .hidden-print, .screen-only { display: none !important; }
       .print-only { display: block !important; }
       body { background: #fff; }
-      .shadow, .rounded-2xl, .bg-white { box-shadow: none !important; border-radius: 0 !important; background: #fff !important; }
+      .shadow, .rounded-2xl, .bg-white, .dark\:bg-gray-900 { 
+        box-shadow: none !important; border-radius: 0 !important; background: #fff !important; 
+      }
     }
-    /* Capture mode mimics print for image export */
     .capture-mode button,
     .capture-mode .hidden-print,
     .capture-mode .screen-only { display: none !important; }
     .capture-mode .print-only { display: block !important; }
   </style>
 </head>
-<body class="bg-gray-100 p-4">
-  <div id="reportCard" class="max-w-lg mx-auto bg-white p-6 rounded-2xl shadow">
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 p-4">
+  <div id="reportCard" class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">
 
-    <h1 class="text-2xl font-bold mb-4 text-center">របាយការណ៍ប្រចាំថ្ងៃ<br /><span class="text-sm">(Daily Sales Report)</span></h1>
-
-    <!-- Date -->
-    <div class="mb-4">
-      <label class="block mb-2">កាលបរិច្ឆេទ (Date)</label>
-      <input type="date" class="w-full p-2 border rounded screen-only" id="reportDate" />
-      <div class="print-only text-sm mt-1">Date: <span id="dateFormattedPrint">—</span></div>
+    <!-- Sticky Header -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-20 pb-2 border-b border-gray-200 dark:border-gray-700">
+      <h1 class="text-2xl font-bold text-center py-2">
+        របាយការណ៍ប្រចាំថ្ងៃ<br />
+        <span class="text-sm">(Daily Sales Report)</span>
+      </h1>
+      <div class="mb-2 flex justify-between items-center">
+        <label class="text-sm">កាលបរិច្ឆេទ (Date)</label>
+        <input type="date" class="p-1 border rounded screen-only
+               bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+               id="reportDate" />
+        <div class="print-only text-sm mt-1">Date: <span id="dateFormattedPrint">—</span></div>
+      </div>
     </div>
 
     <!-- Sales Section -->
-    <h2 class="text-xl font-semibold mb-2">I. ការលក់ (Sales)</h2>
-    <div id="salesContainer" class="space-y-2 mb-4"></div>
-    <button id="btnAddSale" class="bg-blue-500 text-white px-3 py-1 rounded hidden-print">+ Add Customer</button>
+    <h2 class="text-xl font-semibold mb-2 mt-4">I. ការលក់ (Sales)</h2>
+    <table class="w-full border text-sm mb-3 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+      <thead class="bg-gray-100 dark:bg-gray-700">
+        <tr>
+          <th class="border px-2 py-1 text-left dark:border-gray-600">Customer</th>
+          <th class="border px-2 py-1 text-right dark:border-gray-600">Amount (៛)</th>
+        </tr>
+      </thead>
+      <tbody id="salesContainer"></tbody>
+    </table>
+    <button id="btnAddSale" class="bg-blue-500 text-white px-3 py-1 rounded hidden-print flex items-center gap-2
+           dark:bg-blue-600 dark:hover:bg-blue-500">➕ Customer</button>
     <div class="mt-2 font-bold">សរុបការលក់ (A) Total Sales: <span id="totalSales">0</span> ៛</div>
 
     <!-- Purchases Section -->
     <h2 class="text-xl font-semibold mt-6 mb-2">II. ការទិញ (Purchases)</h2>
-    <div id="purchaseContainer" class="space-y-2 mb-4"></div>
-    <button id="btnAddPurchase" class="bg-green-500 text-white px-3 py-1 rounded hidden-print">+ Add Supplier</button>
+    <table class="w-full border text-sm mb-3 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+      <thead class="bg-gray-100 dark:bg-gray-700">
+        <tr>
+          <th class="border px-2 py-1 text-left dark:border-gray-600">Supplier</th>
+          <th class="border px-2 py-1 text-right dark:border-gray-600">Amount (៛)</th>
+        </tr>
+      </thead>
+      <tbody id="purchaseContainer"></tbody>
+    </table>
+    <button id="btnAddPurchase" class="bg-green-500 text-white px-3 py-1 rounded hidden-print flex items-center gap-2
+           dark:bg-green-600 dark:hover:bg-green-500">📦 Supplier</button>
     <div class="mt-2 font-bold">សរុបការទិញ (B) Total Purchases: <span id="totalPurchases">0</span> ៛</div>
 
     <!-- Expenses Section -->
     <h2 class="text-xl font-semibold mt-6 mb-2">III. ការចំណាយ (Expenses)</h2>
-    <div id="expenseContainer" class="space-y-2 mb-4"></div>
-    <button id="btnAddExpense" class="bg-yellow-500 text-white px-3 py-1 rounded hidden-print">+ Add Expense</button>
+    <table class="w-full border text-sm mb-3 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+      <thead class="bg-gray-100 dark:bg-gray-700">
+        <tr>
+          <th class="border px-2 py-1 text-left dark:border-gray-600">Expense Type</th>
+          <th class="border px-2 py-1 text-right dark:border-gray-600">Amount (៛)</th>
+          <th class="border px-2 py-1 text-left dark:border-gray-600">Note</th>
+        </tr>
+      </thead>
+      <tbody id="expenseContainer"></tbody>
+    </table>
+    <button id="btnAddExpense" class="bg-yellow-500 text-white px-3 py-1 rounded hidden-print flex items-center gap-2
+           dark:bg-yellow-600 dark:hover:bg-yellow-500">💰 Expense</button>
     <div class="mt-2 font-bold">សរុបចំណាយ (C) Total Expenses: <span id="totalExpenses">0</span> ៛</div>
 
     <!-- Combined Totals -->
     <div class="mt-6 space-y-2">
       <div class="flex justify-between items-center">
         <label class="font-semibold">IV. ចំណេញសរុប (D=A-B-C) Total Profit:</label>
-        <span id="totalProfit" class="font-bold text-blue-700">0 ៛</span>
+        <span id="totalProfit" class="font-bold">0 ៛</span>
       </div>
       <div class="flex justify-between items-center">
         <label class="font-semibold">V. ទឹកប្រាក់ត្រូវផ្ទេរ (E=B+C):</label>
@@ -66,41 +101,49 @@
       </div>
       <div class="flex justify-between items-center">
         <label class="font-semibold">VI. ប្រាក់កក់ (F) Petty Cash Balance:</label>
-        <input type="number" id="pettyCash" class="w-32 p-2 border rounded text-right screen-only" />
+        <input type="number" id="pettyCash" 
+               class="w-32 p-2 border rounded text-right screen-only
+                      bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
         <span class="print-only" id="pettyCashPrint">0</span>
       </div>
     </div>
 
     <!-- Export / Share Buttons -->
     <div class="mt-4 space-y-2 hidden-print">
-      <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded">Save as Image (PNG)</button>
-      <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded">Share to Telegram</button>
-      <button onclick="window.print()" class="w-full bg-gray-700 text-white py-2 rounded">Print</button>
-      <button id="btnInstall" class="w-full bg-indigo-600 text-white py-2 rounded hidden">Install App</button>
+      <button id="btnSaveImage" class="w-full bg-emerald-600 text-white py-2 rounded dark:bg-emerald-700 dark:hover:bg-emerald-600">Save as Image (PNG)</button>
+      <button id="btnShareTelegram" class="w-full bg-sky-600 text-white py-2 rounded dark:bg-sky-700 dark:hover:bg-sky-600">Share to Telegram</button>
+      <button onclick="window.print()" class="w-full bg-gray-700 text-white py-2 rounded dark:bg-gray-800 dark:hover:bg-gray-600">Print</button>
+      <button id="btnInstall" class="w-full bg-indigo-600 text-white py-2 rounded hidden dark:bg-indigo-700 dark:hover:bg-indigo-600">Install App</button>
+      <button id="btnClearReport" class="w-full bg-red-500 text-white py-2 rounded dark:bg-red-600 dark:hover:bg-red-500">Clear Report</button>
     </div>
 
     <!-- Telegram Bot Settings (screen only) -->
-    <div class="screen-only mt-4 p-3 border rounded space-y-2">
+    <div class="screen-only mt-4 p-3 border rounded space-y-2 dark:border-gray-700 dark:bg-gray-800">
       <div class="text-sm font-semibold">Telegram Settings</div>
-      <input id="tgBotToken" type="password" class="w-full p-2 border rounded" placeholder="Bot Token (kept locally)" />
-      <input id="tgChatId" type="text" class="w-full p-2 border rounded" placeholder="Group Chat ID (e.g., -1001234567890)" />
+      <input id="tgBotToken" type="password" class="w-full p-2 border rounded
+             bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+             placeholder="Bot Token (kept locally)" />
+      <input id="tgChatId" type="text" class="w-full p-2 border rounded
+             bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+             placeholder="Group Chat ID (e.g., -1001234567890)" />
       <label class="flex items-center gap-2 text-sm">
         <input id="tgIncludeCaption" type="checkbox" class="w-4 h-4" />
         <span>Include caption (A/B/C/D/E totals) when sharing</span>
       </label>
-      <p class="text-xs text-gray-500">Stored locally in this browser. Add your bot to the group as admin.</p>
     </div>
 
-    <!-- Diagnostics (for tests) -->
-    <div class="mt-6 hidden-print">
-      <div class="mt-2 p-3 border rounded space-y-2">
-        <div class="flex gap-2 flex-wrap">
-          <button id="btnRunTests" class="bg-slate-800 text-white px-3 py-1 rounded">Apply Step</button>
-          <button id="btnTestTelegram" class="bg-sky-700 text-white px-3 py-1 rounded">Test Telegram</button>
-        </div>
-        <ul id="testResults" class="list-disc pl-5 mt-3 text-sm space-y-1"></ul>
-      </div>
-    </div>
+    <!-- Dark Mode Toggle -->
+    <div class="screen-only mt-4 p-3 border rounded dark:border-gray-700 dark:bg-gray-800">
+      <div class="flex justify-between items-center">
+        <span class="text-sm font-semibold">Dark Mode</span>
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="darkModeToggle" class="sr-only">
+          <span class="w-10 h-5 bg-gray-300 rounded-full shadow-inner flex items-center px-1 transition-colors duration-300"
+                id="darkToggleTrack">
+            <span class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300"
+                  id="darkToggleThumb"></span>
+          </span>
+        </label>
       </div>
     </div>
   </div>
@@ -119,291 +162,133 @@
       const wrapper = document.createElement('div');
       wrapper.className = 'flex gap-2 flex-1';
       const select = document.createElement('select');
-      select.className = 'flex-1 p-2 border rounded ' + cssClass;
+      select.className = 'flex-1 p-1 border rounded '+cssClass+' bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
       for (const item of list) {
         const opt = document.createElement('option'); opt.value = item; opt.textContent = item; select.appendChild(opt);
       }
       const otherInput = document.createElement('input');
-      otherInput.type = 'text'; otherInput.placeholder = 'Specify'; otherInput.className = 'hidden flex-1 p-2 border rounded';
+      otherInput.type = 'text'; otherInput.placeholder = 'Specify';
+      otherInput.className = 'hidden flex-1 p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
       select.addEventListener('change', () => { otherInput.classList.toggle('hidden', select.value !== 'Other (specify)'); });
       wrapper.appendChild(select); wrapper.appendChild(otherInput);
       return { wrapper, select, otherInput };
     }
 
+    // --- Add Rows (Table-style) ---
     function addSale() {
-      const row = document.createElement('div'); row.className = 'flex gap-2';
+      const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(customerList, 'saleSelect');
-      const amt = document.createElement('input'); amt.type='number'; amt.placeholder='Amount'; amt.className='w-32 p-2 border rounded saleAmount';
+      const tdName = document.createElement('td'); tdName.className = 'border px-2 py-1 dark:border-gray-600'; tdName.appendChild(wrapper);
+      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
+      const amt = document.createElement('input');
+      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
+      amt.className='w-full p-1 border rounded text-right saleAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
       amt.addEventListener('input', calculateTotals);
-      row.appendChild(wrapper); row.appendChild(amt); $('#salesContainer').appendChild(row);
+      tdAmt.appendChild(amt);
+      row.appendChild(tdName); row.appendChild(tdAmt);
+      $('#salesContainer').appendChild(row);
+      amt.focus();
     }
     function addPurchase() {
-      const row = document.createElement('div'); row.className = 'flex gap-2';
+      const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(supplierList, 'purchaseSelect');
-      const amt = document.createElement('input'); amt.type='number'; amt.placeholder='Amount'; amt.className='w-32 p-2 border rounded purchaseAmount';
+      const tdName = document.createElement('td'); tdName.className = 'border px-2 py-1 dark:border-gray-600'; tdName.appendChild(wrapper);
+      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
+      const amt = document.createElement('input');
+      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
+      amt.className='w-full p-1 border rounded text-right purchaseAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
       amt.addEventListener('input', calculateTotals);
-      row.appendChild(wrapper); row.appendChild(amt); $('#purchaseContainer').appendChild(row);
+      tdAmt.appendChild(amt);
+      row.appendChild(tdName); row.appendChild(tdAmt);
+      $('#purchaseContainer').appendChild(row);
+      amt.focus();
     }
     function addExpense() {
-      const row = document.createElement('div'); row.className = 'flex gap-2';
+      const row = document.createElement('tr');
       const { wrapper } = createDropdownWithOther(expenseTypes, 'expenseSelect');
-      const amt = document.createElement('input'); amt.type='number'; amt.placeholder='Amount'; amt.className='w-32 p-2 border rounded expenseAmount';
+      const tdType = document.createElement('td'); tdType.className = 'border px-2 py-1 dark:border-gray-600'; tdType.appendChild(wrapper);
+      const tdAmt = document.createElement('td'); tdAmt.className = 'border px-2 py-1 dark:border-gray-600';
+      const amt = document.createElement('input');
+      amt.type='number'; amt.inputMode='numeric'; amt.placeholder='0';
+      amt.className='w-full p-1 border rounded text-right expenseAmount bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
       amt.addEventListener('input', calculateTotals);
-      const name = document.createElement('input'); name.type='text'; name.placeholder='Name/Note'; name.className='flex-1 p-2 border rounded';
-      row.appendChild(wrapper); row.appendChild(amt); row.appendChild(name); $('#expenseContainer').appendChild(row);
+      tdAmt.appendChild(amt);
+      const tdNote = document.createElement('td'); tdNote.className = 'border px-2 py-1 dark:border-gray-600';
+      const note = document.createElement('input');
+      note.type='text'; note.placeholder='Name/Note';
+      note.className='w-full p-1 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white';
+      tdNote.appendChild(note);
+      row.appendChild(tdType); row.appendChild(tdAmt); row.appendChild(tdNote);
+      $('#expenseContainer').appendChild(row);
+      amt.focus();
     }
-    window.addSale = addSale; window.addPurchase = addPurchase; window.addExpense = addExpense;
 
+    // --- Totals & Save ---
     function calculateTotals() {
       const nsum = (nodes) => nodes.reduce((s, n) => s + Number(n.value || 0), 0);
       const totalSales = nsum($$('.saleAmount'));
       const totalPurchases = nsum($$('.purchaseAmount'));
       const totalExpenses = nsum($$('.expenseAmount'));
+
       $('#totalSales').textContent = totalSales.toLocaleString();
       $('#totalPurchases').textContent = totalPurchases.toLocaleString();
       $('#totalExpenses').textContent = totalExpenses.toLocaleString();
-      const profit = totalSales - totalPurchases - totalExpenses; $('#totalProfit').textContent = profit.toLocaleString() + ' ៛';
-      const totalTransfer = totalPurchases + totalExpenses; $('#totalTransfer').textContent = totalTransfer.toLocaleString() + ' ៛';
+
+      const profit = totalSales - totalPurchases - totalExpenses;
+      const transfer = totalPurchases + totalExpenses;
+
+      const profitEl = $('#totalProfit');
+      profitEl.textContent = profit.toLocaleString() + ' ៛';
+      profitEl.className = "font-bold " +
+        (profit > 0 ? "text-green-600" : profit < 0 ? "text-red-600" : "text-gray-600");
+
+      $('#totalTransfer').textContent = transfer.toLocaleString() + ' ៛';
+
       localStorage.setItem('pettyCashBalance', $('#pettyCash').value || '');
       $('#pettyCashPrint').textContent = ($('#pettyCash').value || '0');
+
+      saveReportData();
     }
 
-    function formatDateYYYYMMDD(d) {
-      const dt = new Date(d); const yyyy = dt.getFullYear(); const mm = String(dt.getMonth()+1).padStart(2,'0'); const dd = String(dt.getDate()).padStart(2,'0');
-      return `${yyyy}-${mm}-${dd}`;
-    }
-    function formatDateDDMMYYYY(d) {
-      const dt = new Date(d); const dd = String(dt.getDate()).padStart(2,'0'); const mm = String(dt.getMonth()+1).padStart(2,'0'); const yyyy = dt.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
-    }
-
-    function updateDateDisplays() {
-      const val = $('#reportDate').value; const date = val ? new Date(val) : new Date();
-      $('#dateFormattedPrint').textContent = formatDateDDMMYYYY(date);
-    }
-
-    // --- Robust html2canvas loader ---
-    const HTML2CANVAS_SOURCES = [
-      'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-      'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
-      'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'
-    ];
-    function loadScript(url){
-      return new Promise((resolve,reject)=>{ const s=document.createElement('script'); s.src=url; s.async=true; s.onload=resolve; s.onerror=()=>reject(new Error('Failed to load '+url)); document.head.appendChild(s); });
-    }
-    async function ensureHtml2Canvas(){
-      if(window.html2canvas) return;
-      let lastErr;
-      for(const src of HTML2CANVAS_SOURCES){ try{ await loadScript(src); if(window.html2canvas) return; } catch(e){ lastErr = e; } }
-      throw lastErr || new Error('html2canvas failed to load from all sources');
-    }
-
-    // --- Save as Image (PNG) ---
-    async function saveAsImage(){
-      const card = document.getElementById('reportCard');
-      updateDateDisplays(); calculateTotals();
-      try{ await ensureHtml2Canvas(); } catch(e){ alert('Could not load image engine (html2canvas). You can still Print → Save as PDF.\n\nDetails: ' + e.message); return; }
-      card.classList.add('capture-mode');
-      try{
-        const canvas = await window.html2canvas(card,{ backgroundColor:'#ffffff', scale:2, useCORS:true });
-        const val = document.getElementById('reportDate').value || new Date();
-        const fname = `Daily_Report_${formatDateDDMMYYYY(val)}.png`;
-        const a = document.createElement('a'); a.download=fname; a.href = canvas.toDataURL('image/png'); a.click();
-      } finally { card.classList.remove('capture-mode'); }
-    }
-
-    // --- Helper: caption string with totals ---
-    function getCaptionString(dateVal){
-      const dateStr = formatDateDDMMYYYY(dateVal||new Date());
-      return `Daily Sales Report | ${dateStr}\nA=${document.getElementById('totalSales').textContent} ៛  B=${document.getElementById('totalPurchases').textContent} ៛  C=${document.getElementById('totalExpenses').textContent} ៛\nD=${document.getElementById('totalProfit').textContent}  E=${document.getElementById('totalTransfer').textContent}`;
-    }
-
-    // --- Share to Telegram (image, optional caption) ---
-    async function shareToTelegram(){
-      const token = (document.getElementById('tgBotToken').value||'').trim();
-      const chatId = (document.getElementById('tgChatId').value||'').trim();
-      const includeCaption = document.getElementById('tgIncludeCaption').checked;
-      if(!token || !chatId){ alert('Please enter your Telegram Bot Token and Group Chat ID first.'); return; }
-      try{ await ensureHtml2Canvas(); } catch(e){ alert('html2canvas failed to load. You can still Print → PDF.\n\nDetails: ' + e.message); return; }
-      const card = document.getElementById('reportCard');
-      card.classList.add('capture-mode');
-      try{
-        const canvas = await window.html2canvas(card,{ backgroundColor:'#ffffff', scale:2, useCORS:true });
-        const blob = await new Promise(res => canvas.toBlob(res,'image/png'));
-        if(!blob) throw new Error('Could not create image blob');
-        const dateVal = document.getElementById('reportDate').value || new Date();
-        const form = new FormData();
-        form.append('chat_id', chatId);
-        form.append('photo', blob, `Daily_Report_${formatDateDDMMYYYY(dateVal)}.png`);
-        if(includeCaption){ form.append('caption', getCaptionString(dateVal)); }
-        const resp = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendPhoto`,{ method:'POST', body: form });
-        if(!resp.ok){ const t = await resp.text().catch(()=> ''); throw new Error('Telegram API error: ' + resp.status + ' ' + t); }
-        alert('✅ Sent image to Telegram' + (includeCaption ? ' with caption.' : ' (no caption).'));
-      }catch(err){ alert('❌ Failed to send to Telegram. ' + err.message); }
-      finally{ card.classList.remove('capture-mode'); }
-    }
-
-    // --- Wire up & init after DOM is ready ---
-    (function init(){
-      // Buttons
-      document.getElementById('btnSaveImage').addEventListener('click', saveAsImage);
-      document.getElementById('btnShareTelegram').addEventListener('click', shareToTelegram);
-      document.getElementById('btnAddSale').addEventListener('click', addSale);
-      document.getElementById('btnAddPurchase').addEventListener('click', addPurchase);
-      document.getElementById('btnAddExpense').addEventListener('click', addExpense);
-
-      // Date + persisted petty cash
-      document.getElementById('reportDate').value = formatDateYYYYMMDD(new Date());
-      updateDateDisplays();
-      const saved = localStorage.getItem('pettyCashBalance'); if (saved) document.getElementById('pettyCash').value = saved;
-      document.getElementById('pettyCash').addEventListener('input', calculateTotals);
-      document.getElementById('reportDate').addEventListener('change', updateDateDisplays);
-
-      // Bootstrap one row each
-      addSale(); addPurchase(); addExpense();
-
-      // Telegram creds persistence
-      const t = localStorage.getItem('tgBotToken')||'';
-      const c = localStorage.getItem('tgChatId')||'';
-      const ic = localStorage.getItem('tgIncludeCaption')==='1';
-      document.getElementById('tgBotToken').value = t; 
-      document.getElementById('tgChatId').value = c; 
-      document.getElementById('tgIncludeCaption').checked = ic;
-      document.getElementById('tgBotToken').addEventListener('input', ()=> localStorage.setItem('tgBotToken', document.getElementById('tgBotToken').value));
-      document.getElementById('tgChatId').addEventListener('input', ()=> localStorage.setItem('tgChatId', document.getElementById('tgChatId').value));
-      document.getElementById('tgIncludeCaption').addEventListener('change', ()=> localStorage.setItem('tgIncludeCaption', document.getElementById('tgIncludeCaption').checked ? '1':'0'));
-    })();
-
-    // --- Diagnostics / Self-tests ---
-    function addResult(ok,msg){ const li=document.createElement('li'); li.textContent=(ok?'✅ ':'❌ ')+msg; li.className= ok?'text-green-700':'text-red-700'; document.getElementById('testResults').appendChild(li); }
-    async function runTests(){
-      document.getElementById('testResults').innerHTML='';
-      // Function existence + wiring
-      addResult(typeof addSale === 'function', 'addSale is defined');
-      addResult(typeof addPurchase === 'function', 'addPurchase is defined');
-      addResult(typeof addExpense === 'function', 'addExpense is defined');
-      const before = document.querySelectorAll('.saleAmount').length; document.getElementById('btnAddSale').click(); const after = document.querySelectorAll('.saleAmount').length; addResult(after === before + 1, '+ Add Customer button adds a row');
-
-      // Math
-      document.getElementById('salesContainer').innerHTML=''; document.getElementById('purchaseContainer').innerHTML=''; document.getElementById('expenseContainer').innerHTML='';
-      addSale(); addPurchase(); addExpense();
-      document.querySelectorAll('.saleAmount')[0].value='1000';
-      document.querySelectorAll('.purchaseAmount')[0].value='300';
-      document.querySelectorAll('.expenseAmount')[0].value='200';
-      calculateTotals();
-      addResult(document.getElementById('totalProfit').textContent.includes('500'),'Profit D=A-B-C = 500');
-      addResult(document.getElementById('totalTransfer').textContent.includes('500'),'Transfer E=B+C = 500');
-      // Date format
-      document.getElementById('reportDate').value='2025-01-05'; updateDateDisplays();
-      addResult(document.getElementById('dateFormattedPrint').textContent==='05-01-2025','Date prints DD-MM-YYYY');
-      // html2canvas loader
-      try{ await ensureHtml2Canvas(); addResult(!!window.html2canvas,'html2canvas loads/available'); }catch(e){ addResult(false,'html2canvas failed: '+e.message); }
-      // Capture-mode hides inputs/buttons
-      const card=document.getElementById('reportCard'); card.classList.add('capture-mode');
-      const dateHidden = getComputedStyle(document.getElementById('reportDate')).display==='none';
-      const addHidden = Array.from(document.querySelectorAll('.hidden-print')).every(el=> getComputedStyle(el).display==='none');
-      addResult(dateHidden,'Capture hides date input'); addResult(addHidden,'Capture hides +Add buttons'); card.classList.remove('capture-mode');
-      // Caption toggle behavior
-      const hasGetSupported = typeof FormData.prototype.get === 'function';
-      document.getElementById('tgIncludeCaption').checked = false;
-      let f1 = new FormData(); f1.append('chat_id','-100'); f1.append('photo', new Blob(['x'],{type:'image/png'}),'r.png'); if(document.getElementById('tgIncludeCaption').checked){ f1.append('caption', getCaptionString(new Date())); }
-      addResult(!hasGetSupported || f1.get('caption')==null, 'Caption toggle OFF → no caption');
-      document.getElementById('tgIncludeCaption').checked = true;
-      let f2 = new FormData(); f2.append('chat_id','-100'); f2.append('photo', new Blob(['x'],{type:'image/png'}),'r2.png'); if(document.getElementById('tgIncludeCaption').checked){ f2.append('caption', getCaptionString(new Date())); }
-      addResult(!hasGetSupported || !!f2.get('caption'), 'Caption toggle ON → caption present');
-      
-      // PWA safe registration check (no blob URLs)
-      addResult(!!document.querySelector('link[rel="manifest"]'), 'Manifest link present');
-      // Use runtime flags from setupPWA to avoid env false negatives
-      addResult(window.__swAttempted === true || window.__swSkippedDueToProtocol === true, 'Service Worker only attempted on http/https (skipped otherwise)');
-    }
-    document.getElementById('btnRunTests').addEventListener('click', runTests);
-    document.getElementById('btnTestTelegram').addEventListener('click', testTelegram);
-
-    // --- Telegram quick test (token + chat_id) ---
-    async function testTelegram(){
-      const token = (document.getElementById('tgBotToken').value||'').trim();
-      const chatId = (document.getElementById('tgChatId').value||'').trim();
-      const log = (ok,msg)=>{ const li=document.createElement('li'); li.textContent=(ok?'✅ ':'❌ ')+msg; li.className= ok?'text-green-700':'text-red-700'; document.getElementById('testResults').appendChild(li); };
-      document.getElementById('testResults').innerHTML='';
-      if(!token){ log(false,'Enter Bot Token first'); return; }
-      try {
-        const me = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/getMe`);
-        const j = await me.json();
-        if(!j.ok) throw new Error(j.description||'getMe failed');
-        log(true, `Token OK → @${j.result.username}`);
-      } catch(e){ log(false,'getMe failed: '+e.message); return; }
-      if(!chatId){ log(false,'Enter Group/Channel/User chat_id'); return; }
-      try {
-        const msgUrl = `https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`;
-        const resp = await fetch(msgUrl, { method:'POST', headers:{}, body: (()=>{ const f=new FormData(); f.append('chat_id', chatId); f.append('text','ping from Daily Sales Report ✅'); return f; })() });
-        const jr = await resp.json();
-        if(!jr.ok) throw new Error(jr.description||('HTTP '+resp.status));
-        log(true,'sendMessage OK → chat reachable');
-      } catch(e){ log(false,'sendMessage failed: '+e.message+'. Make sure the bot is in the group and chat_id is correct (usually starts with -100...).'); }
-    }
-
-    // ===== PWA: Manifest + (Safe) Service Worker Handling =====
-    (function setupPWA(){
-      // 1) Install a simple manifest dynamically
-      const iconPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAVUlEQVRYhe3OwQkAMAwEwSn//1kE2qE0qg2p0g6xJ2gSxHkVw6sCz8h0GAgb1k1q2i6bQm6qwNw1mFyxXwqQ0n0yJ6y0p2n0Q2o6r7p2P3Qy1sVJg9W1gH0X8VGo8Yv3+gJ7dRZQk4q2gAAAAAElFTkSuQmCC';
-      const manifest = {
-        name: 'Daily Sales Report',
-        short_name: 'Sales Report',
-        start_url: '.',
-        display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#0ea5e9',
-        icons: [
-          { src: iconPng, sizes: '32x32', type: 'image/png' },
-          { src: iconPng, sizes: '192x192', type: 'image/png' },
-          { src: iconPng, sizes: '512x512', type: 'image/png' }
-        ]
+    // --- Save/Restore Data ---
+    function saveReportData() {
+      const data = {
+        date: $('#reportDate').value,
+        pettyCash: $('#pettyCash').value,
+        sales: [],
+        purchases: [],
+        expenses: []
       };
-      const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = url;
-      document.head.appendChild(link);
-
-      // 2) SAFE Service Worker: only attempt on http/https and with a real file
-      window.__swAttempted = false; // diagnostics flag
-      window.__swSkippedDueToProtocol = false; // diagnostics flag
-      (async function tryRegisterSW(){
-        if (!('serviceWorker' in navigator)) { return; }
-        if (!/^https?:$/.test(location.protocol)) { window.__swSkippedDueToProtocol = true; return; }
-        try {
-          const resp = await fetch('sw.js', { cache: 'no-store' });
-          if (!resp.ok) { window.__swSkippedDueToProtocol = true; return; } // treat as skipped if file missing
-          await navigator.serviceWorker.register('sw.js');
-          window.__swAttempted = true;
-        } catch (e) {
-          // If registration fails (network/etc.), mark as attempted so diagnostics know it was a proper http/https attempt.
-          window.__swAttempted = true;
-        }
-      })();
-
-      // 3) Install prompt handler and button
-      let deferredPrompt = null;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const btn = document.getElementById('btnInstall');
-        if (btn) btn.classList.remove('hidden');
-      });
-      const btn = document.getElementById('btnInstall');
-      if (btn) {
-        btn.addEventListener('click', async () => {
-          if (!deferredPrompt) { alert('Install prompt not available yet. Try again after using the app for a bit.'); return; }
-          deferredPrompt.prompt();
-          await deferredPrompt.userChoice;
-          deferredPrompt = null;
-          btn.classList.add('hidden');
+      $$('#salesContainer tr').forEach(row => {
+        data.sales.push({
+          name: row.querySelector('select').value,
+          other: row.querySelector('input[type=text]')?.value || "",
+          amount: row.querySelector('.saleAmount').value || ""
         });
-      }
-    })();
+      });
+      $$('#purchaseContainer tr').forEach(row => {
+        data.purchases.push({
+          name: row.querySelector('select').value,
+          other: row.querySelector('input[type=text]')?.value || "",
+          amount: row.querySelector('.purchaseAmount').value || ""
+        });
+      });
+      $$('#expenseContainer tr').forEach(row => {
+        data.expenses.push({
+          name: row.querySelector('select').value,
+          other: row.querySelector('input[type=text]')?.value || "",
+          amount: row.querySelector('.expenseAmount').value || "",
+          note: row.querySelector('input[placeholder="Name/Note"]').value || ""
+        });
+      });
+      localStorage.setItem("dailyReportData", JSON.stringify(data));
+    }
 
-  </script>
-</body>
-</html>
+    // --- Dark Mode Toggle ---
+    (function setupDarkMode(){
+      const toggle = document.getElementById("darkModeToggle");
+      const track = document.getElementById("darkToggleTrack");
+      const thumb = document.getElementById("darkToggleThumb");
+
+      const saved = localStorage.getItem("darkMode");
+      if(saved
