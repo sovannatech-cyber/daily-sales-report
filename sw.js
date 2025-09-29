@@ -1,5 +1,5 @@
 // sw.js - Khmer Flavor Mart PWA
-const CACHE_NAME = "kfm-sales-v2";   // bump version to refresh cache
+const CACHE_NAME = "kfm-sales-v1";
 const ASSETS = [
   "/",
   "/index.html",
@@ -8,7 +8,7 @@ const ASSETS = [
   "/icon-512.png"
 ];
 
-// Install - cache files
+// Install
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
@@ -16,7 +16,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Activate - clean old caches
+// Activate
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -26,7 +26,7 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch - network first, fallback to cache
+// Fetch
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
